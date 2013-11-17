@@ -30,7 +30,7 @@ public class Mathematic {
                 divisorVector = minusVectors(divisorVector, minusVector);
             }
         }
-        return new AbstractMap.SimpleEntry<int[], int[]>(resultVector,divisorVector);
+        return new AbstractMap.SimpleEntry<int[], int[]>(resultVector,checkVector(divisorVector));
     }
     
     public int[] checkVector(int [] inVector)
@@ -74,7 +74,7 @@ public class Mathematic {
         int[] resultVector = new int[divisorVector.length];
         for(int i = minusVector.length - 1; i >= 0; i--)
         {
-            resultVector[i] = (divisorVector[i] - minusVector[i]) % 2;
+            resultVector[i] = (divisorVector[i] + minusVector[i]) % 2;
         }
         return resultVector;
     }

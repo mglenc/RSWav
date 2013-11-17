@@ -54,7 +54,7 @@ public class WavHelper {
                 int[] infoInt = new int[64];
                 
                 for(int i = 0; i < 64; i++) {
-                    infoInt[i] = infoBitSet.get(i) ? 1 : 0;
+                    infoInt[63 - i] = infoBitSet.get(63 - i) ? 1 : 0;
                 }
                 
                 //tu wywołanie kodera i dekodera zwracającego tablice byte'ów do odtworzenia
@@ -82,7 +82,7 @@ public class WavHelper {
         int[] codePolyInt = new int[40];
         
         for(int i = 0; i < 40; i++) {
-            codePolyInt[i] = codePolyBitSet.get(i) ? 1 : 0;
+            codePolyInt[39 - i] = codePolyBitSet.get(39 - i) ? 1 : 0;
         }
                 
         AbstractMap.SimpleEntry<int [], int []> result = math.divideVectors(data, codePolyInt);
@@ -90,12 +90,12 @@ public class WavHelper {
         int[] restVector = result.getValue();
         
         System.out.printf("\nWielomian wynikowy: ");
-        for(int i = resultVector.length - 1; i >= 0; i--) {
+        for(int i = 0; i < resultVector.length; i++) {
             System.out.printf(Integer.toString(resultVector[i]));
         }
         
         System.out.printf(" Reszta z dzielenia: ");
-        for(int i = restVector.length - 1; i >= 0; i--) {
+        for(int i = 0; i < restVector.length; i++) {
             System.out.printf(Integer.toString(restVector[i]));
         }
         return 0;
