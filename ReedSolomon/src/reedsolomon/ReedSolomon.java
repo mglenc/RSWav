@@ -8,6 +8,8 @@ package reedsolomon;
 
 import java.util.AbstractMap;
 
+import java.util.BitSet;
+
 /**
  *
  * @author wirus
@@ -19,9 +21,9 @@ public class ReedSolomon {
      */
     public static void main(String[] args) {
         
-        WavHelper wh = new WavHelper("F:\\hallelujah.wav");
+        WavHelper wh = new WavHelper("/Users/mglenc/Desktop/Workspace/zajecia/kisd/RSWav/hallelujah.wav");
         
-        Mathematic math = new Mathematic();
+        /*Mathematic math = new Mathematic();
         int[] divisorVector = new int[8];
         int[] dividentVector = new int[5];
         divisorVector[7] = 1;
@@ -35,10 +37,6 @@ public class ReedSolomon {
         for(int i = resultVector.length - 1; i >= 0; i--)
         {
             System.out.printf(Integer.toString(resultVector[i]));
-            
-        }
-        
-        
+        }*/   
     }
-    
 }
