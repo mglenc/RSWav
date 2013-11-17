@@ -72,11 +72,11 @@ public class WavHelper {
         Mathematic math = new Mathematic();
         
         byte[] coderData = new byte[5];
-        coderData[0] = 1;
-        coderData[1] = 15;
+        coderData[0] = 64;
+        coderData[1] = 120;
         coderData[2] = 70;
-        coderData[3] = 120;
-        coderData[4] = 64;
+        coderData[3] = 15;
+        coderData[4] = 1;
                 
         BitSet codePolyBitSet = BitSet.valueOf(coderData);
         int[] codePolyInt = new int[40];
@@ -89,12 +89,12 @@ public class WavHelper {
         int[] resultVector = result.getKey();
         int[] restVector = result.getValue();
         
-        System.out.printf("\nWielomian wynikowy");
+        System.out.printf("\nWielomian wynikowy: ");
         for(int i = resultVector.length - 1; i >= 0; i--) {
             System.out.printf(Integer.toString(resultVector[i]));
         }
         
-        System.out.printf("Reszta z dzielenia: ");
+        System.out.printf(" Reszta z dzielenia: ");
         for(int i = restVector.length - 1; i >= 0; i--) {
             System.out.printf(Integer.toString(restVector[i]));
         }
