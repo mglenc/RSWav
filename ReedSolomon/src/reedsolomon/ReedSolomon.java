@@ -21,7 +21,7 @@ public class ReedSolomon {
      */
     public static void main(String[] args) {
         
-        WavHelper wh = new WavHelper("F:\\hallelujah.wav");
+        WavHelper wh = new WavHelper("/Users/mglenc/Desktop/Workspace/zajecia/kisd/RSWav/hallelujah.wav");
         
         /*Mathematic math = new Mathematic();
         int[] divisorVector = new int[8];

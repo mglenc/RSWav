@@ -56,6 +56,7 @@ public class WavHelper {
                 for(int i = 0; i < 64; i++) {
                     infoInt[63 - i] = infoBitSet.get(63 - i) ? 1 : 0;
                 }
+              
                 
                 //tu wywołanie kodera i dekodera zwracającego tablice byte'ów do odtworzenia
                 coder(infoInt);
@@ -89,15 +90,34 @@ public class WavHelper {
         int[] resultVector = result.getKey();
         int[] restVector = result.getValue();
         
-        System.out.printf("\nWielomian wynikowy: ");
+        System.out.printf("\nDane: ");
+        for(int i = 0; i < data.length; i++) {
+            System.out.printf(Integer.toString(data[i]));
+        }
+        
+        /*System.out.printf(" Wielomian wynikowy: ");
         for(int i = 0; i < resultVector.length; i++) {
             System.out.printf(Integer.toString(resultVector[i]));
-        }
+        }*/
         
         System.out.printf(" Reszta z dzielenia: ");
         for(int i = 0; i < restVector.length; i++) {
             System.out.printf(Integer.toString(restVector[i]));
         }
+        
+        //Laczymy czesc informacyjna (dane) z reszta z dzielenia przez generator
+        //Wynikogo otrzymujemy ciag 12B = 96b
+        int[] codedData = new int[96];
+        
+        System.arraycopy(data, 0, codedData, 0, data.length);
+        System.arraycopy(restVector, 0, codedData, 64, restVector.length);
+        
+        System.out.printf("\nZakodowane dane: ");
+        for(int i = 0; i < codedData.length; i++) {
+            System.out.printf(Integer.toString(codedData[i]));
+        }
+        System.out.printf("\n");
+        
         return 0;
     }
 
