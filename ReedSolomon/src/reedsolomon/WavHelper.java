@@ -15,6 +15,9 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 
 import java.util.BitSet;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
 /**
  *
  * @author wirus
@@ -54,7 +57,7 @@ public class WavHelper {
                 int[] infoInt = new int[64];
                 
                 for(int i = 0; i < 64; i++) {
-                    infoInt[63 - i] = infoBitSet.get(63 - i) ? 1 : 0;
+                    infoInt[i] = infoBitSet.get(i) ? 1 : 0;
                 }
               
                 
@@ -82,23 +85,30 @@ public class WavHelper {
         BitSet codePolyBitSet = BitSet.valueOf(coderData);
         int[] codePolyInt = new int[40];
         
-        for(int i = 0; i < 40; i++) {
-            codePolyInt[39 - i] = codePolyBitSet.get(39 - i) ? 1 : 0;
+        for(int i = 0; i < 5; i++) {
+            for(int j = 0; j < 8; j++) {
+                codePolyInt[8 * i + j] = codePolyBitSet.get(8 * i + j) ? 1 : 0;
+            }
         }
+        
+        System.out.printf("Wielomian generujacy:");
+        for(int i = 0; i < codePolyInt.length; i++) {
+            System.out.printf(Integer.toString(codePolyInt[i]));
+        }
+        
+        //Mnozenie przez x do 4
+        int [] dataMultiplied = new int[96];
+        System.arraycopy(data, 0, dataMultiplied, 32, 64);
+
                 
-        AbstractMap.SimpleEntry<int [], int []> result = math.divideVectors(data, codePolyInt);
+        AbstractMap.SimpleEntry<int [], int []> result = math.divideVectors(dataMultiplied, codePolyInt);
         int[] resultVector = result.getKey();
         int[] restVector = result.getValue();
         
         System.out.printf("\nDane: ");
-        for(int i = 0; i < data.length; i++) {
-            System.out.printf(Integer.toString(data[i]));
+        for(int i = 0; i < dataMultiplied.length; i++) {
+            System.out.printf(Integer.toString(dataMultiplied[i]));
         }
-        
-        /*System.out.printf(" Wielomian wynikowy: ");
-        for(int i = 0; i < resultVector.length; i++) {
-            System.out.printf(Integer.toString(resultVector[i]));
-        }*/
         
         System.out.printf(" Reszta z dzielenia: ");
         for(int i = 0; i < restVector.length; i++) {
@@ -107,15 +117,26 @@ public class WavHelper {
         
         //Laczymy czesc informacyjna (dane) z reszta z dzielenia przez generator
         //Wynikogo otrzymujemy ciag 12B = 96b
-        int[] codedData = new int[96];
-        
-        System.arraycopy(data, 0, codedData, 0, data.length);
-        System.arraycopy(restVector, 0, codedData, 64, restVector.length);
+        System.arraycopy(restVector, 0, dataMultiplied, 0, restVector.length);
         
         System.out.printf("\nZakodowane dane: ");
-        for(int i = 0; i < codedData.length; i++) {
-            System.out.printf(Integer.toString(codedData[i]));
+        for(int i = 0; i < dataMultiplied.length; i++) {
+            System.out.printf(Integer.toString(dataMultiplied[i]));
         }
+        
+        //Zaklamanie jednego bitu
+        //dataMultiplied[7] = 1;
+        
+        //Obliczanie reszty z dzielenia zakodowanych danych przez weilomian generujacy
+        result = math.divideVectors(dataMultiplied, codePolyInt);
+        resultVector = result.getKey();
+        restVector = result.getValue();
+        
+        System.out.printf("\nReszta z dzielenia zakodowanego słowa:");
+        for(int i = 0; i < restVector.length; i++) {
+            System.out.printf(Integer.toString(restVector[i]));
+        }
+        
         System.out.printf("\n");
         
         return 0;
