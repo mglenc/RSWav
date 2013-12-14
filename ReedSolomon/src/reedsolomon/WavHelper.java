@@ -49,6 +49,7 @@ public class WavHelper {
         int bytesResult = 0;
         
         try{
+            int byteCount = 0;
             while(bytesResult >= 0){
                 bytesResult = audioInputStream.read(segmentData, 0, 8);
              
@@ -67,6 +68,9 @@ public class WavHelper {
                 coderData[2] = 70;
                 coderData[3] = 15;
                 coderData[4] = 1;
+                
+                System.out.printf("Przetwarzany bajt: %d", byteCount);
+                byteCount++;
                 
                 int[] codedData = coder(infoInt, coderData);
                 
@@ -90,18 +94,20 @@ public class WavHelper {
     }
     
     public int[] rotateRight( int data[], int k) {
-            int temp = data[data.length-1];
-            for(int i = 0; i < k; i++) {
-                System.arraycopy(data, 0, data, 1, data.length-1);
-                data[0] = temp;
-            }
+        int temp;
+        for(int i = 0; i < k; i++) {
+            temp = data[data.length-1];
+            System.arraycopy(data, 0, data, 1, data.length-1);
+            data[0] = temp;
+        }
         
         return data;
     }
     
     public int[] rotateLeft(int data[], int k) {
-        int temp = data[0];
+        int temp;
         for(int i = 0; i < k; i++) {
+            temp = data[0];
             System.arraycopy(data, 1, data, 0, data.length-1);
             data[data.length-1] = temp;
         }
@@ -121,7 +127,7 @@ public class WavHelper {
             }
         }
         
-        System.out.printf("Wielomian generujacy:");
+        System.out.printf("\nWielomian generujacy:");
         for(int i = 0; i < codePolyInt.length; i++) {
             System.out.printf(Integer.toString(codePolyInt[i]));
         }
@@ -149,15 +155,15 @@ public class WavHelper {
         //Wynikogo otrzymujemy ciag 12B = 96b
         System.arraycopy(restVector, 0, dataMultiplied, 0, restVector.length);
         
-        System.out.printf("\nZakodowane dane: ");
+        System.out.printf("\nZakodowane dane (wysylane): ");
         for(int i = 0; i < dataMultiplied.length; i++) {
             System.out.printf(Integer.toString(dataMultiplied[i]));
         }
         
         //Zaklamanie jednego bitu
-        //dataMultiplied[7] = 1;
-        dataMultiplied[25] = 1;
-        //dataMultiplied[32] = 1;
+        //dataMultiplied[0] ^= 1;
+        //dataMultiplied[25] = 1;
+        dataMultiplied[32] ^= 1;
         
         return dataMultiplied;
     }
@@ -166,6 +172,21 @@ public class WavHelper {
         BitSet codePolyBitSet = BitSet.valueOf(coderData);
         int[] codePolyInt = new int[40];
         
+        /*int[] tempGen = new int[4];
+        tempGen[0] = 1;
+        tempGen[1] = 1;
+        tempGen[2] = 0;
+        tempGen[3] = 1;
+        
+        int[] tempData = new int[7];
+        tempData[0] = 1;
+        tempData[1] = 0;
+        tempData[2] = 0;
+        tempData[3] = 1;
+        tempData[4] = 0;
+        tempData[5] = 1;
+        tempData[6] = 1;*/
+          
         int correctingAbility = 2;
         
         for(int i = 0; i < 5; i++) {
@@ -174,12 +195,20 @@ public class WavHelper {
             }
         }
         
+        /*data = tempData;
+        codePolyInt = tempGen;*/
+        
         System.out.printf("\nWielomian generujacy:");
         for(int i = 0; i < codePolyInt.length; i++) {
             System.out.printf(Integer.toString(codePolyInt[i]));
         }
+        
+        System.out.printf("\nOdebrane dane: ");
+        for(int i = 0; i < data.length; i++) {
+            System.out.printf(Integer.toString(data[i]));
+        }
 
-        //data = rotateRight(data, 8);
+        //data = rotateLeft(data, 1);
         
         //Obliczanie syndromu
         AbstractMap.SimpleEntry<int [], int []> result = math.divideVectors(data, codePolyInt);
@@ -190,25 +219,28 @@ public class WavHelper {
         for(int i = 0; i < restVector.length; i++) {
             System.out.printf(Integer.toString(restVector[i]));
         }
-
+ 
         int[] decodedData = new int[64];
+        int weight = hammingWeight(restVector);
+        System.out.printf("\nWaga Hamminga syndromu: %d", weight);
         //Obliczanie wagi bledu i porownanie ze zdolnoscia korekcyjna t
-        if(hammingWeight(restVector) <= correctingAbility) {
+        if(weight <= correctingAbility) {
             //Bledy w czesci kontrolnej, kopiujemy dobre dane
-            System.arraycopy(data, 32, decodedData, 0, decodedData.length);
+            //System.arraycopy(data, 32, decodedData, 0, decodedData.length);
         } else {
             boolean readyForCorrection = false;
             int rotateCount = 0;
             int dataRotated[] = data;
             //Przesuniecie cykliczne w lewo
+            int minHamm = 32;
             while(!readyForCorrection) {
                 rotateCount++;
                 dataRotated = rotateLeft(dataRotated, 1);
                 
-                System.out.printf("\n%d. Obrot danych w lewo: ", rotateCount);
+                /*System.out.printf("\n%d. Obrot danych w lewo: ", rotateCount);
                 for(int i = 0; i < dataRotated.length; i++) {
                     System.out.printf(Integer.toString(dataRotated[i]));
-                }
+                }*/
                 
                 result = math.divideVectors(dataRotated, codePolyInt);
                 resultVector = result.getKey();
@@ -219,22 +251,38 @@ public class WavHelper {
                     System.out.printf(Integer.toString(restVector[i]));
                 }
                 
-                int weight = hammingWeight(restVector);
+                weight = hammingWeight(restVector);
+                
+                if(weight < minHamm) minHamm = weight;
                 
                 System.out.printf("\nWaga Hamminga syndromu: %d", weight);
+                System.out.printf("\nMinimalna waga do tej pory: %d", minHamm);
                 
                 System.out.printf("\n");
                 
                 if(weight <= correctingAbility) {
                     readyForCorrection = true;
+                } else if(rotateCount >= 64) {
+                    break;
                 }
+            }
+            if(readyForCorrection) {
+                //Dodanie wektora i obrot w druga strone
+                int[] res = math.minusVectors1(dataRotated, restVector);
+                System.out.printf("\nPrzesuniecia i dane zdekodowane: %d ", rotateCount);
+                res = rotateRight(res, rotateCount);
+                for(int i = 0; i < res.length; i++) {
+                    System.out.printf(Integer.toString(res[i]));
+                }
+            } else {
+                System.out.printf("\nWystapil blad niekorygowalny!");
             }
         }
         
-        System.out.printf("\nDane zdekodowane: ");
+        /*System.out.printf("\nDane zdekodowane: ");
         for(int i = 0; i < decodedData.length; i++) {
             System.out.printf(Integer.toString(decodedData[i]));
-        }
+        }*/
         
         System.out.printf("\n\n");
         

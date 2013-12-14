@@ -72,10 +72,38 @@ public class Mathematic {
     public int[] minusVectors(int[] divisorVector, int[] minusVector)
     {
         int[] resultVector = new int[divisorVector.length];
+        
+        //Moja zmiana
+        //resultVector = divisorVector;
+        
         for(int i = minusVector.length - 1; i >= 0; i--)
         {
             resultVector[i] = (divisorVector[i] + minusVector[i]) % 2;
         }
+        //Moja zmiana
+        /*for(int i = 0; i < resultVector.length; i++)
+        {
+            System.out.print(resultVector[i]);
+        }*/
+        return resultVector;
+    }
+    
+    public int[] minusVectors1(int[] divisorVector, int[] minusVector)
+    {
+        int[] resultVector = new int[divisorVector.length];
+        
+        //Moja zmiana
+        resultVector = divisorVector;
+        
+        for(int i = minusVector.length - 1; i >= 0; i--)
+        {
+            resultVector[i] = (divisorVector[i] + minusVector[i]) % 2;
+        }
+        //Moja zmiana
+        /*for(int i = 0; i < resultVector.length; i++)
+        {
+            System.out.print(resultVector[i]);
+        }*/
         return resultVector;
     }
 }
