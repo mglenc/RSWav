@@ -14,6 +14,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import java.util.BitSet;
+import java.util.Arrays;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -62,19 +63,28 @@ public class WavHelper {
                 }
                 
                 //tu wywołanie kodera i dekodera zwracającego tablice byte'ów do odtworzenia
-                byte[] coderData = new byte[5];
-                coderData[0] = 64;
-                coderData[1] = 120;
-                coderData[2] = 70;
-                coderData[3] = 15;
-                coderData[4] = 1;
+                int[] codePolyInt1 = {
+                    0,0,1,0,1,1,1,0, //116
+                    1,1,1,0,0,1,1,1, //231
+                    0,0,0,1,1,0,1,1, //216
+                    0,1,1,1,1,0,0,0, //30
+                    1,0,0,0,0,0,0,0 //1
+                };
                 
-                System.out.printf("Przetwarzany bajt: %d", byteCount);
+                int[] codePolyInt2 = {
+                    0,0,0,0,0,0,1,0, //64
+                    0,0,0,1,1,1,1,0, //120
+                    0,1,1,0,0,0,1,0, //70
+                    1,1,1,1,0,0,0,0, //15
+                    1,0,0,0,0,0,0,0 //1
+                };
+                
+                System.out.printf("Przetwarzany blok danych: %d", byteCount);
                 byteCount++;
                 
-                int[] codedData = coder(infoInt, coderData);
+                int[] codedData = coder(infoInt, codePolyInt1);
                 
-                int[] decodedData = decoder(codedData, coderData);
+                int[] decodedData = decoder(codedData, codePolyInt1);
             }
         }
         catch(IOException ex){
@@ -117,15 +127,15 @@ public class WavHelper {
     
     Mathematic math = new Mathematic();
     
-    public int[] coder(int[] data, byte[] coderData) {
-        BitSet codePolyBitSet = BitSet.valueOf(coderData);
+    public int[] coder(int[] data, int[] codePolyInt) {
+        /*BitSet codePolyBitSet = BitSet.valueOf(coderData);
         int[] codePolyInt = new int[40];
         
         for(int i = 0; i < 5; i++) {
             for(int j = 0; j < 8; j++) {
-                codePolyInt[8 * i + j] = codePolyBitSet.get(8 * i + j) ? 1 : 0;
+                codePolyInt[8 * i + j] = codePolyBitSet.get(8 * i +j) ? 1 : 0;
             }
-        }
+        }*/
         
         System.out.printf("\nWielomian generujacy:");
         for(int i = 0; i < codePolyInt.length; i++) {
@@ -163,14 +173,20 @@ public class WavHelper {
         //Zaklamanie jednego bitu
         //dataMultiplied[0] ^= 1;
         //dataMultiplied[25] = 1;
-        dataMultiplied[32] ^= 1;
+        //dataMultiplied[32] ^= 1;
         
         return dataMultiplied;
     }
     
-    public int[] decoder(int[] data, byte[] coderData) {
-        BitSet codePolyBitSet = BitSet.valueOf(coderData);
+    public int[] decoder(int[] data, int[] codePolyInt) {
+        /*BitSet codePolyBitSet = BitSet.valueOf(coderData);
         int[] codePolyInt = new int[40];
+        
+        for(int i = 0; i < 5; i++) {
+            for(int j = 0; j < 8; j++) {
+                codePolyInt[8 * i + j] = codePolyBitSet.get(8 * i + j) ? 1 : 0;
+            }
+        }*/
         
         /*int[] tempGen = new int[4];
         tempGen[0] = 1;
@@ -189,14 +205,16 @@ public class WavHelper {
           
         int correctingAbility = 2;
         
-        for(int i = 0; i < 5; i++) {
-            for(int j = 0; j < 8; j++) {
-                codePolyInt[8 * i + j] = codePolyBitSet.get(8 * i + j) ? 1 : 0;
-            }
-        }
-        
         /*data = tempData;
         codePolyInt = tempGen;*/
+        
+        //dane dzialajace
+        //int [] workingData = {0,0,0,0,0,0,0,1,0,0,0,1,1,1,0,1,0,0,1,0,1,0,1,1,1,0,0,0,0,1,1,0,1,0,1,1,1,1,1,0,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,0,0,1,0,1,1,1,1,0,0,0,1,0,1,1,1,0,1,1,0,0,1,1,1,0,0,0,1,0,1,1,1,0,1,0,1,0,1,1,1,0};
+        //int [] notWorkingData = {0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,0,1,0,1,1,1,1,1,0,0,0,0,1,1,1,0,1,0,1,1,1,1,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,1,0,1,1,1,1,0,0,1,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,1,0,0,0,0,0,1};
+        
+        //System.arraycopy(workingData, 0, data, 0, workingData.length);
+
+        //data = rotateRight(data,1);
         
         System.out.printf("\nWielomian generujacy:");
         for(int i = 0; i < codePolyInt.length; i++) {
@@ -207,8 +225,6 @@ public class WavHelper {
         for(int i = 0; i < data.length; i++) {
             System.out.printf(Integer.toString(data[i]));
         }
-
-        //data = rotateLeft(data, 1);
         
         //Obliczanie syndromu
         AbstractMap.SimpleEntry<int [], int []> result = math.divideVectors(data, codePolyInt);
